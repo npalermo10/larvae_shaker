@@ -3,23 +3,27 @@
 import simpleaudio as sa
 import time
 import os
+import numpy as np
+
 
     
-note_freq = 50 ## in hz
-play_duration = 0.2 ## given in seconds (as float)
+note_freq = 20 ## in hz
+play_duration = 2 ## given in seconds (as float)
 wait_time = 1 ## minutes wait between tones. Will not work if random_wait is true
 random_wait = 0 ## if true (1) here then give random min and max minutes wait
 rand_min_wait = 10 ## in minutes
 rand_max_wait = 60 ## in minutes
 total_time = 120 ## total run time of experiment given in 
 
+save_dir = "./shaker_stim_info/"  ##where to save data
+
 def writefile(filename, freq, duration):
     f=open(filename,"a")
     f.write("{}, {}, {}, {}\n".format(time.strftime('%H:%M:%S'), time.time(), freq, duration))
     f.close()
 
-if not os.path.exists("shaker_stim_info/"):
-    os.makedirs("shaker_stim_info/")
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
 
 # get timesteps for each sample, T is note duration in seconds
 sample_rate = 44100
@@ -36,7 +40,7 @@ print("running")
 print("-{}".format(time.asctime( time.localtime(time.time()))))
 play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
 file_name=(time.strftime('%Y_%m_%d.txt'))
-file_name= "shaker_stim_info/" + file_name
+file_name= save_dir + file_name
 f=open(file_name,"a")
 f.write("{}, {}, {}, {}\n".format("time", "sec_since_epoch", "freq(Hz)", "duration(s)"))
 f.close()
@@ -53,7 +57,7 @@ while running:
         print("played on {}".format(time.asctime( time.localtime(time.time()))))
         play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
         file_name=(time.strftime('%Y_%m_%d.txt'))
-        file_name= "shaker_stim_info/" + file_name
+        file_name= save_dir + file_name
         writefile(file_name, note_freq, play_duration)
         last_play = time.time()
         play_obj.wait_done()
