@@ -1,14 +1,21 @@
 ## to install you need to run "sudo apt-get install -y python3-dev libasound2-dev" then install the module "sudo pip3 install simpleaudio"
 
+
 import simpleaudio as sa
 import time
 import os
 import numpy as np
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
 
+b4_shake_pin = 13
+post_shake_pin = 19
+GPIO.setup(13, GPIO.OUT)
+GPIO.setup(19, GPIO.OUT)
 
-    
 note_freq = 20 ## in hz
-play_duration = 2 ## given in seconds (as float)
+play_duration = 2
+## given in seconds (as float)
 wait_time = 1 ## minutes wait between tones. Will not work if random_wait is true
 random_wait = 0 ## if true (1) here then give random min and max minutes wait
 rand_min_wait = 10 ## in minutes
@@ -54,6 +61,9 @@ while running:
 
     # start playback
     if time.time() - last_play >= wait_time*60:
+        GPIO.output(b4_shake_pin, GPIO.HIGH)
+        time.sleep(1)
+        GPIO.output(b4_shake_pin, GPIO.LOW)
         print("played on {}".format(time.asctime( time.localtime(time.time()))))
         play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
         file_name=(time.strftime('%Y_%m_%d.txt'))
@@ -61,6 +71,9 @@ while running:
         writefile(file_name, note_freq, play_duration)
         last_play = time.time()
         play_obj.wait_done()
+        GPIO.output(post_shake_pin, GPIO.HIGH)
+        time.sleep(60)
+        GPIO.output(post_shake_pin, GPIO.LOW)
         
     if time.time() - start_time >= total_time*60:
         running = False
