@@ -13,10 +13,10 @@ post_shake_pin = 19
 GPIO.setup(13, GPIO.OUT)
 GPIO.setup(19, GPIO.OUT)
 
-note_freq = 20 ## in hz
+note_freq = 100 ## in hz
 play_duration = 2
 ## given in seconds (as float)
-wait_time = 1 ## minutes wait between tones. Will not work if random_wait is true
+wait_time = 60 ## minutes wait between tones. Will not work if random_wait is true
 random_wait = 0 ## if true (1) here then give random min and max minutes wait
 rand_min_wait = 10 ## in minutes
 rand_max_wait = 60 ## in minutes
@@ -42,17 +42,21 @@ audio *= 32767 / np.max(np.abs(audio))
 # convert to 16-bit data
 audio = audio.astype(np.int16)
 
-start_time = time.time() ##time recorded as seconds since epoch
-print("running")
-print("-{}".format(time.asctime( time.localtime(time.time()))))
+GPIO.output(b4_shake_pin, GPIO.HIGH)
+time.sleep(1)
+GPIO.output(b4_shake_pin, GPIO.LOW)
+print("played on {}".format(time.asctime( time.localtime(time.time()))))
 play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
 file_name=(time.strftime('%Y_%m_%d.txt'))
 file_name= save_dir + file_name
-f=open(file_name,"a")
-f.write("{}, {}, {}, {}\n".format("time", "sec_since_epoch", "freq(Hz)", "duration(s)"))
-f.close()
 writefile(file_name, note_freq, play_duration)
+last_play = time.time()
 play_obj.wait_done()
+GPIO.output(post_shake_pin, GPIO.HIGH)
+time.sleep(60)
+GPIO.output(post_shake_pin, GPIO.LOW)
+        
+start_time = time.time() ##time recorded as seconds since epoch
 last_play = time.time()
 running = True
 while running:
